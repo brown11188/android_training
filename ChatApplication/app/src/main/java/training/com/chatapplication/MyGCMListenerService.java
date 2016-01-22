@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,7 +25,7 @@ public class MyGCMListenerService extends GcmListenerService {
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
-//        sendNotification(message);
+        sendNotification(message);
     }
 
     private void sendNotification(String message) {
@@ -40,11 +39,12 @@ public class MyGCMListenerService extends GcmListenerService {
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
+                .setSmallIcon(R.drawable.ic_setting)
                 .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-//        notificationManager.notify(0, builder.build());
+        notificationManager.notify(0, builder.build());
 
 
     }
