@@ -22,9 +22,7 @@ import java.io.IOException;
 public class GCMClientManager {
     // Constants
     public static final String TAG = "GCMClientManager";
-    public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private GoogleCloudMessaging gcm;
@@ -38,25 +36,12 @@ public class GCMClientManager {
         this.gcm = GoogleCloudMessaging.getInstance(activity);
     }
 
-    private static int getAppVersion(Context context) {
-        try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // should never happen
-            throw new RuntimeException("Could not get package name: " + e);
-        }
-    }
-
-
     public void registerIfNeeded(final RegistrationCompletedHandler handler) {
         if(checkPlayServices()) {
-            regId = getRegistrationId(getContext());
+            regId = getRegistrationId(getActivity());
             if(regId.isEmpty()) {
                 registerInBackground(handler);
             } else {
-                Log.d(TAG, "if needed" + regId );
                 handler.onSuccess(regId, false);
             }
         } else {
@@ -71,11 +56,10 @@ public class GCMClientManager {
             protected String doInBackground(Void... params) {
                 try {
                 if(gcm == null) {
-                    gcm = GoogleCloudMessaging.getInstance(getContext());
+                    gcm = GoogleCloudMessaging.getInstance(getActivity());
                 }
-                    InstanceID instanceID = InstanceID.getInstance(getContext());
+                    InstanceID instanceID = InstanceID.getInstance(getActivity());
                     regId = instanceID.getToken(projectNumber, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-                    Log.i(TAG, "background" + regId);
                 } catch (IOException e) {
                     handler.onFailure("Error :" + e.getMessage());
                 }
@@ -87,7 +71,6 @@ public class GCMClientManager {
                 if(regId != null) {
                     handler.onSuccess(regId, true);
                 }
-
             }
         }.execute(null, null, null);
     }
@@ -99,30 +82,20 @@ public class GCMClientManager {
             Log.i(TAG, "Registration not found");
             return "";
         }
-        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        Log.i("APP VERSION", registeredVersion + "");
-        int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
-        }
         return registrationId;
     }
 
     private SharedPreferences getGCMPreferences(Context context) {
-        return getContext().getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
+        return getActivity().getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
     }
 
-    private Context getContext() {
-        return activity;
-    }
 
     private Activity getActivity() {
         return activity;
     }
 
     private boolean checkPlayServices() {
-        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
+        int resultCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getActivity());
         if(resultCode != ConnectionResult.SUCCESS){
             if(GoogleApiAvailability.getInstance().isUserResolvableError(resultCode)){
                 GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), resultCode , PLAY_SERVICES_RESOLUTION_REQUEST).show();

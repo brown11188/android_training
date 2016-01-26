@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">ChatApplication</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_upstream">UpstreamActivity</string>
+
+    <!-- Chat Screen -->
+    <string name="btn_send">Send Message</string>
+    <string name="btn_intent">Upstream Message</string>
+    <string name="tv_title">Home Page</string>
+    <string name="title_activity_chat">ChatActivity</string>
 </resources>
